@@ -1,3 +1,5 @@
+CREATE DATABASE SS2;
+USE SS2;
 CREATE TABLE Categories (
     CategoryID INT AUTO_INCREMENT PRIMARY KEY,
     CategoryName VARCHAR(100) NOT NULL,
@@ -161,6 +163,15 @@ VALUES (4, 2, 5, 'Fits perfectly, very happy with my purchase!', '2024-01-21 16:
 
 
 -- 1. Báo cáo tổng doanh thu từng đơn hàng
+SELECT 
+    O.OrderID AS 'Mã đơn hàng',
+    SUM(OD.Price * OD.Quantity) AS 'Tổng doanh thu'
+FROM 
+    Orders O
+JOIN 
+    OrderDetails OD ON O.OrderID = OD.OrderID
+GROUP BY 
+    O.OrderID;
 -- 2. Báo cáo số lượng sản phẩm đã bán theo danh mục
 -- 3. Báo cáo danh sách khách hàng và số lượng đơn hàng mỗi khách hàng đã đặt
 -- 4. Báo cáo tỷ lệ đơn hàng đã giao thành công
@@ -170,10 +181,163 @@ VALUES (4, 2, 5, 'Fits perfectly, very happy with my purchase!', '2024-01-21 16:
 -- 8. Tìm khách hàng có đơn hàng có giá trị cao nhất
 -- 9. Tổng doanh thu từng tháng trong năm
 
+-- 2. Báo cáo số lượng sản phẩm đã bán theo danh mục
+SELECT 
+    C.CategoryName AS 'Danh mục',
+    SUM(OD.Quantity) AS 'Số lượng sản phẩm đã bán'
+FROM 
+    Categories C
+JOIN 
+    Products P ON C.CategoryID = P.CategoryID
+JOIN 
+    OrderDetails OD ON P.ProductID = OD.ProductID
+GROUP BY 
+    C.CategoryID, C.CategoryName;
+
+-- 3. Báo cáo danh sách khách hàng và số lượng đơn hàng mỗi khách hàng đã đặt
+SELECT
+U.FullName AS 'Tên KH',
+COUNT(O.OrderID) AS 'SỐ HÀNG ĐÃ MUA'
+FROM
+Customers U
+JOIN
+Orders O on U.CustomerID= O.CustomerID
+GROUP BY
+U.customerID,U.FullName;
+
+-- 4. Báo cáo tỷ lệ đơn hàng đã giao thành công
+SELECT 
+    SUM(CASE WHEN O.Status = 'Delivered' THEN 1 ELSE 0 END) AS 'Đơn hàng thành công',
+    COUNT(*) AS 'Tổng số đơn hàng',
+    CONCAT(
+        FORMAT(
+            (SUM(CASE WHEN O.Status = 'Delivered' THEN 1 ELSE 0 END) / COUNT(*)) * 100,2),
+        '%'
+    ) AS 'Tỷ lệ thành công'
+FROM 
+    Orders O;
+
+-- 5. Báo cáo đánh giá sản phẩm và điểm đánh giá trung bình cho mỗi sản phẩm
+SELECT
+    P.ProductName AS 'Tên Sản phẩm',
+    R.Comment AS 'Đánh giá',
+    AVG(R.Rating) AS 'Điểm đánh giá trung bình'
+FROM
+    Reviews R
+JOIN
+    Products P ON P.ProductID = R.ProductID
+GROUP BY
+    R.ProductID, R.Comment;
+
+-- 6. Liệt kê các sản phẩm được đặt hàng nhiều nhất
+select
+P.ProductName as 'Tên SP',
+Max(Quantity) as 'Số Lượng'
+from 
+products P
+join 
+OrderDetails OD on P.productID = OD.productID
+group by
+P.ProductName;
+
+-- 7. Tìm kiếm sản phẩm dựa trên mức đánh giá trung bình
+select 
+P.ProductName as 'Tên SP',
+avg(Rating) as 'Điểm TB'
+From 
+products P
+Join reviews R on R.ProductID = P.ProductID
+group by
+P.ProductName
+having avg(R.Rating) >=4;
+
+-- 8. Tìm khách hàng có đơn hàng có giá trị cao nhất
+SELECT
+C.FullName AS 'Tên KH',
+MAX(O.TotalAmount) AS 'Giá Trị Mua Cao Nhất'
+FROM
+Customers C
+JOIN
+Orders O ON O.CustomerID = C.CustomerID
+GROUP BY
+C.FullName
+ORDER BY MAX(O.TotalAmount) DESC
+LIMIT 1;
+-- HAVING
+-- MAX(O.TotalAmount) = (SELECT MAX(TotalAmount) FROM Orders);
+
+-- 9. Tổng doanh thu từng tháng trong năm
+SELECT
+    MONTH(OrderDate) AS 'Tháng',
+    SUM(TotalAmount) AS 'Tổng Doanh Thu'
+FROM
+    Orders
+GROUP BY
+    MONTH(OrderDate);
 
 
 
 
+-- 1. Báo cáo tổng doanh thu từng đơn hàng
+select od.OrderID, sum(od.Quantity * od.Price) as tongdoangthu 
+from OrderDetails od
+group by OrderID;
+-- 2. Báo cáo số lượng sản phẩm đã bán theo danh mục
+select c.CategoryName, sum(od.Quantity) as tongsanphamdaban
+from Categories c
+inner join Products p on c.CategoryID = p.CategoryID
+inner join OrderDetails od on p.ProductID = od.ProductID
+group by c.CategoryName;
+-- 3. Báo cáo danh sách khách hàng và số lượng đơn hàng mỗi khách hàng đã đặt
+select c.FullName, count(o.OrderID) as tongdonhang
+from Customers c
+left join Orders o on c.CustomerID = o.CustomerID
+group by c.FullName;
+-- 4. Báo cáo tỷ lệ đơn hàng đã giao thành công
+
+-- 5. Báo cáo đánh giá sản phẩm và điểm đánh giá trung bình cho mỗi sản phẩm
+select p.ProductName,r.Comment,
+avg(r.Rating) as danhgiasanpham
+from Products p
+left join Reviews r on p.ProductID = r.ProductID
+group by p.ProductName,r.Comment;
+-- 6. Liệt kê các sản phẩm được đặt hàng nhiều nhất
+select p.ProductName,
+sum(od.Quantity) as tongsoluongdathang
+from Products p
+inner join OrderDetails od on p.ProductID = od.ProductID
+group by p.ProductName
+order by tongsoluongdathang desc;
+-- 7. Tìm kiếm sản phẩm dựa trên mức đánh giá trung bình
+select p.ProductName,avg(r.Rating) as danhgiatrungbinh
+from Products p
+left join Reviews r on p.ProductID = r.ProductID
+group by p.ProductName
+having danhgiatrungbinh + 1 >= 2;
+-- 8. Tìm khách hàng có đơn hàng có giá trị cao nhất
+select c.FullName,max(o.TotalAmount) as giatridonhangcaonhat
+from Customers c
+inner join Orders o on c.CustomerID = o.CustomerID
+group by c.FullName
+order by giatridonhangcaonhat desc
+limit 1;
+-- 9. Tổng doanh thu từng tháng trong năm
+select month(o.OrderDate) as month,
+sum(o.TotalAmount) as tongdoangthu
+from Orders o
+group by month(o.OrderDate);
+
+
+select sum(case when od.Status = 'Delivered' then 1 else 0 end) as 'Thành công' ,
+ count(*) as 'Tổng đơn',
+ round(100.0*sum(case when od.Status = 'Delivered' then 1 else 0 end)/count(*) ,1) as 'Tỉ lệ'
+from Orders od;
+
+-- 6. Liệt kê các 3 sản phẩm được đặt hàng nhiều nhất
+select p.ProductName from products p
+where p.Price = (select avg(r.Rating) from products p
+join reviews r on r.ProductID = p.ProductID
+group by r.ProductID );
 
 
 
