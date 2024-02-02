@@ -1,6 +1,11 @@
 package com.ra.entity;
 
-public class Category {
+import java.sql.CallableStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+
+public class Category implements IEntity {
     private int id;
     private String name;
     private String keyword;
@@ -8,6 +13,13 @@ public class Category {
     private boolean status;
 
     public Category() {
+    }
+    public Category(ResultSet rs) throws SQLException {
+        setId(rs.getInt("id"));
+        setName(rs.getString("name"));
+        setKeyword(rs.getString("keyword"));
+        setDescription(rs.getString("description"));
+        setStatus(rs.getBoolean("status"));
     }
 
     public Category(int id, String name, String keyword, String description, boolean status) {
@@ -56,5 +68,14 @@ public class Category {
 
     public void setStatus(boolean status) {
         this.status = status;
+    }
+
+    @Override
+    public void init(ResultSet rs) throws SQLException {
+        setId(rs.getInt("id"));
+        setName(rs.getString("name"));
+        setKeyword(rs.getString("keyword"));
+        setDescription(rs.getString("description"));
+        setStatus(rs.getBoolean("status"));
     }
 }
