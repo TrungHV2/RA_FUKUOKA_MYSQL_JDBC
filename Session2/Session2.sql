@@ -243,6 +243,7 @@ group by cus.id;
 -- 4. Hiển thị đơn hàng mua nhiều hơn 2 sản phẩm
 -- 5. Hiển thị top 3 sản phẩm bán chạy nhất
 -- 6. Hiển thị danh Danh sách khách hàng gồm: Mã KH, Tên KH, Tổng tiền đã mua
+select * from categories c;
 
 
 

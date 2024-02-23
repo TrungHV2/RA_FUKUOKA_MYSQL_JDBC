@@ -1,7 +1,7 @@
 -- INDEX
 CREATE INDEX IDX_CUS_PHONE ON Customers (Phone);
 CREATE INDEX IDX_CUS_EMAIL_PHONE ON Customers (Email, Phone);
-select * from Customers where phone like '555%' and Email like 'charlie@example.com';
+select * from Customers where Address = '123 Main St';
 -- STORE PROCEDURE
 DELIMITER //
 CREATE PROCEDURE SP_SEARCH_REPORT_RATE(IN RATE float, OUT OUT_PARAM varchar(50))
@@ -61,7 +61,8 @@ select * from VW_REPORT_PRODUCT_SELL;
 	-- 6. Liệt lấy ra n sản phẩm được đặt hàng nhiều nhất
     -- 7. Tìm kiếm sản phẩm dựa trên mức đánh giá trung bình
     -- 9. Tổng doanh thu từng tháng trong của năm x (x là tham số in của thủ tục)
-    -- 10. Insert dữ liệu vào bảng order, trả về id của order vừa được insert.
+    -- 10. Insert dữ liệu vào bảng order, trả về id của order vừa được insert
+    -- (OUT orderId int, IN customerId int, IN orderDate datetime, IN totalAmount decimal(10,2), IN status enum('Pending','Shipped','Delivered','Cancelled')).
     
 -- Tạo VIEW
 	-- 2. Báo cáo số lượng sản phẩm đã bán theo danh mục
